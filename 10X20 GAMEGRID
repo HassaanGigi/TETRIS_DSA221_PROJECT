@@ -1,0 +1,55 @@
+#include <iostream>
+#include <cstring>
+#include <vector>
+
+using namespace std;
+
+const int Grid_W = 10;
+const int Grid_H = 20;
+
+class TetrisGrid
+{
+private:
+vector<vector<char>> grid;
+
+public:
+TetrisGrid()
+{
+    //initializing grid
+grid.resize(Grid_H, vector<char>(Grid_W, '.'));
+
+}
+    //setting playing field + borders
+void display()
+    {
+        
+        for(int row = 0;row < Grid_H;++row)
+        {
+            cout << "X";
+            for(int col = 0 ; col < Grid_W;++col)
+            {
+                cout << ".";
+            }
+            cout << "X" << endl;
+        }
+    }
+bool addtetromino(int x,int y, char tetrominos)
+{
+    if(x >= 0 && x < Grid_W && y >= 0 && y < Grid_H)
+    {
+        if(grid[x][y] == '.')
+        {
+            grid[x][y] == tetrominos;
+            return true; //successfully placed piece
+        }
+    }
+    else 
+    return false; //error:
+}
+};
+
+int main()
+{
+    TetrisGrid Test;
+    Test.display();
+}
