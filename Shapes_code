@@ -1,0 +1,175 @@
+#include <iostream>
+#include <vector>
+#include <ctime>
+#include <chrono>
+#include <thread>
+#include <cstdlib>
+#include <cstring>
+
+using namespace std;
+
+
+const int Grid_W = 10;
+const int Grid_H = 20;
+
+//creating Hashmaps instead of using library
+class Hashmaps
+{
+private:
+struct Node
+{
+    string key;
+    vector <vector<int>> value;
+    Node* next;
+};
+
+Node ** Table;
+int size;
+
+int hash(const string& key)
+{
+    int hashval = 0;
+    for(size_t i = 0; i < key.length();i++) 
+    {
+        char ch = key[i];
+        hashval += ch;
+    }
+    return hashval % size;
+}
+
+public:
+Hashmaps(int s) 
+{
+    size = s;
+    Table = new Node *[size]();
+}
+
+~Hashmaps()
+{
+    for (int i = 0; i < size; ++i) 
+    {
+    Node* entry = Table[i];
+    while (entry)
+    {
+    Node* temp = entry;
+    entry = entry->next;
+    delete temp;
+    }
+    }
+delete[] Table;
+} 
+
+void insert(const string& key, vector<vector<int>> & val)
+{
+    int index = hash(key);
+    Node * newnode = new Node{key, val, Table[index]};
+    Table[index] = newnode;
+}
+
+bool get(const string& key, vector<vector<int>>& value) {
+        int index = hash(key);
+        Node* entry = Table[index];
+        while (entry) {
+            if (entry->key == key) {
+                value = entry->value;
+                return true;
+            }
+            entry = entry->next;
+        }
+        return false;
+    }
+};
+
+
+class Tetrominos 
+{
+private:
+vector<vector<int>> Shapes;
+int x,y; //coordinates of pieces.
+Hashmaps tetromino;
+
+public:
+Tetrominos(const string& type) : x(4), y(0), tetromino(10)
+{
+    vector<vector<int>> I_shape = {{1, 1, 1, 1}};
+    vector<vector<int>> O_Shape =  {{1, 1}, {1, 1}};
+    vector<vector<int>> T_Shape = {{0, 1, 0}, {1, 1, 1}};
+    vector<vector<int>> L_Shape = {{0, 0, 1}, {1, 1, 1}};
+    vector<vector<int>> J_Shape = {{0, 0, 1}, {1, 1, 1}};
+    vector<vector<int>> S_Shape = {{0, 1, 1}, {1, 1, 0}};
+    vector<vector<int>> Z_Shape = {{1, 1, 0}, {0, 1, 1}};
+    tetromino.insert("I",I_shape);
+    tetromino.insert("O",O_Shape);
+    tetromino.insert("T",T_Shape);
+    tetromino.insert("L",L_Shape);
+    tetromino.insert("J",J_Shape);
+    tetromino.insert("S",S_Shape);
+    tetromino.insert("Z",Z_Shape);
+
+    if (!tetromino.get(type, Shapes)) 
+    {
+    throw invalid_argument("Invalid tetromino type");
+    }
+
+}
+
+void rotate()
+{
+    vector<vector<int>> newShape(Shapes[0].size(), vector<int>(Shapes.size()));
+    for(size_t i = 0; i < Shapes[0].size();i++)
+    {
+        for(size_t j =0; j < Shapes.size();j++)
+        {
+            newShape[j][Shapes.size() - 1 - i] = Shapes[i][j];
+        }
+    }
+    Shapes = newShape;
+}
+
+vector<vector<int>> get_shape()
+{return Shapes;}
+
+
+vector<vector<int>> get_position()
+{return;}
+
+void move(int new_x,int new_y)
+{
+    x += new_x;
+    y += new_y;
+}
+
+bool canmoveto(vector<vector<int>>&grid, int new_x, int new_y)
+{
+    for(size_t i = 0; i < Shapes.size();i++)
+    {
+        for(size_t j = 0; j < Shapes.size();i++)
+        {
+            if(Shapes[i][j] == 1)
+            {
+                int newPosX = new_x;
+                int newPosY = new_y;
+                if(newPosX < 0 || newPosX >= Grid_W || newPosY >= Grid_H || (newPosY >= 0 && grid[newPosY][newPosX] == 1))
+                {
+                    return false; 
+                }
+            }
+        }
+    }
+return true; //if no collisions or out of bounds, allow movement.
+}
+
+void Place_Shape(vector<vector<int>> & grid)
+{
+    for(size_t i = 0; i < Shapes.size();i++)
+    {
+        for(size_t j = 0;j < Shapes.size();j++)
+        {
+            if(Shapes[i][j] == 1)
+            {
+                grid[y + i][x + j] = 1; //sucessfully placed block
+            }
+        }
+    }
+}
+};
