@@ -1,0 +1,5 @@
+
+string Get_next()
+{
+    if(Tetromino_next)
+}
